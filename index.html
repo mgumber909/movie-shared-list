@@ -3,864 +3,399 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movie List</title>
+    <title>Our Shared Watchlist</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter Font -->
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #fff;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            animation: fadeIn 0.8s ease-out;
-        }
-
-        h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .controls {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            justify-content: center;
-            animation: fadeIn 0.8s ease-out 0.2s both;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-
-        .btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-
-        .btn-primary {
-            background: rgba(255, 255, 255, 0.95);
-            color: #667eea;
-        }
-
-        .btn-primary:hover {
-            background: white;
-        }
-
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.5);
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 8px 16px;
-            font-size: 0.9rem;
-        }
-
-        .filter-btn.active {
-            background: rgba(255, 255, 255, 0.4);
-        }
-
-        .search-bar {
-            padding: 12px 20px;
-            border-radius: 12px;
-            border: none;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            min-width: 300px;
-            backdrop-filter: blur(10px);
-        }
-
-        .movies-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
-            animation: fadeIn 0.8s ease-out 0.4s both;
-        }
-
-        .movie-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 25px;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative;
-        }
-
-        .movie-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .movie-actions {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            display: flex;
-            gap: 8px;
-        }
-
-        .icon-btn {
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .icon-btn:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(1.1);
-        }
-
-        .movie-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            line-height: 1.3;
-            padding-right: 80px;
-        }
-
-        .movie-meta {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 15px;
-        }
-
-        .tag {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        .status {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-
-        .status.watched {
-            background: rgba(52, 211, 153, 0.3);
-            color: #d1fae5;
-        }
-
-        .status.watching {
-            background: rgba(251, 191, 36, 0.3);
-            color: #fef3c7;
-        }
-
-        .status.want-to-watch {
-            background: rgba(239, 68, 68, 0.3);
-            color: #fee2e2;
-        }
-
-        .rating {
-            font-size: 1.2rem;
-            margin: 10px 0;
-        }
-
-        .notes {
-            opacity: 0.9;
-            line-height: 1.5;
-            margin-top: 10px;
-            font-size: 0.95rem;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 35px;
-            border-radius: 25px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            animation: slideUp 0.3s ease-out;
-        }
-
-        .modal h2 {
-            margin-bottom: 25px;
-            font-size: 2rem;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            font-family: inherit;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .movie-search {
-            margin-bottom: 25px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-        }
-
-        .movie-search input {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            margin-bottom: 10px;
-        }
-
-        .search-results {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 10px;
-        }
-
-        .search-result-item {
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .search-result-item:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: translateX(5px);
-        }
-
-        .search-result-item img {
-            width: 40px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 5px;
-        }
-
-        .search-result-info {
-            flex: 1;
-        }
-
-        .search-result-title {
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
-
-        .search-result-meta {
-            font-size: 0.85rem;
-            opacity: 0.8;
-        }
-
-        .divider {
-            text-align: center;
-            margin: 25px 0;
-            position: relative;
-            opacity: 0.5;
-        }
-
-        .divider::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 100%;
-            height: 1px;
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .divider span {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 0 15px;
-            position: relative;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 25px;
-        }
-
-        .form-actions button {
-            flex: 1;
-        }
-
-        .loading {
-            text-align: center;
-            font-size: 1.5rem;
-            padding: 50px;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        .error {
-            background: rgba(239, 68, 68, 0.2);
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-            margin: 20px 0;
-            border: 1px solid rgba(239, 68, 68, 0.5);
-        }
-
-        .stats {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            animation: fadeIn 0.8s ease-out 0.3s both;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            padding: 20px 30px;
-            border-radius: 15px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .stat-number {
-            font-size: 2.5rem;
-            font-weight: 800;
-        }
-
-        .stat-label {
-            opacity: 0.9;
-            margin-top: 5px;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.5;
-            }
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-            
-            .movies-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .search-bar {
-                min-width: 100%;
-            }
+            font-family: 'Inter', sans-serif;
+            background-color: #0d1117; /* Dark theme background */
+            color: #c9d1d9;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <h1>🎬 Movie List</h1>
-            <p class="subtitle">Your shared collection</p>
+<body class="p-4 md:p-8 min-h-screen">
+
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-extrabold text-white mb-2 tracking-tight">Our Watchlist</h1>
+            <p class="text-lg text-gray-400">Movies & Shows to watch together.</p>
         </header>
 
-        <div class="stats" id="stats"></div>
-
-        <div class="controls">
-            <button class="btn btn-primary" onclick="openAddModal()">➕ Add Movie</button>
-            <button class="btn" onclick="loadMovies()">🔄 Refresh</button>
-            <input type="text" class="search-bar" id="searchBar" placeholder="Search movies...">
-        </div>
-
-        <div class="controls filter-buttons" id="filterButtons"></div>
-
-        <div id="content">
-            <div class="loading">Loading your movies...</div>
-        </div>
-    </div>
-
-    <!-- Add/Edit Modal -->
-    <div id="movieModal" class="modal">
-        <div class="modal-content">
-            <h2 id="modalTitle">Add Movie</h2>
+        <!-- Search and Add Section -->
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-10">
+            <h2 class="text-2xl font-semibold mb-4 text-white">Add New Item</h2>
             
-            <div class="movie-search" id="movieSearch">
-                <label style="display: block; margin-bottom: 8px; font-weight: 600;">🔍 Quick Search</label>
-                <input type="text" id="searchInput" placeholder="Search for a movie (e.g., Inception)...">
-                <div class="search-results" id="searchResults"></div>
+            <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                <input type="text" id="omdb-search-input" placeholder="Search for a Movie or Show Title..."
+                       class="flex-grow p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:ring-sky-500 focus:border-sky-500 border-none transition duration-150 ease-in-out">
+                <button onclick="handleSearch()"
+                        class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-[1.01] flex items-center justify-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    Search
+                </button>
             </div>
 
-            <div class="divider"><span>OR ADD MANUALLY</span></div>
+            <!-- OMDB Search Results and Details Display -->
+            <div id="omdb-results" class="hidden mt-4 bg-gray-700 p-4 rounded-lg border border-gray-600">
+                <div id="search-feedback" class="text-center text-gray-400 py-4 hidden"></div>
 
-            <form id="movieForm">
-                <div class="form-group">
-                    <label>Title *</label>
-                    <input type="text" id="title" required>
+                <div id="omdb-detail-card" class="flex flex-col md:flex-row items-start gap-4">
+                    <!-- Image will be injected here -->
+                    <img id="omdb-poster" src="" alt="Poster" class="w-24 h-36 object-cover rounded-lg shadow-lg flex-shrink-0">
+                    <div class="flex-grow">
+                        <h3 id="omdb-title" class="text-xl font-bold text-white"></h3>
+                        <p id="omdb-meta" class="text-sm text-gray-400 mb-3"></p>
+                        <p id="omdb-plot" class="text-gray-300 text-sm mb-4"></p>
+                        <button onclick="addItemToWatchlist()"
+                                class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-[1.01]">
+                            <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            Add to Watchlist
+                        </button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Year</label>
-                    <input type="number" id="year" min="1900" max="2030">
-                </div>
-                <div class="form-group">
-                    <label>Genre</label>
-                    <input type="text" id="genre" placeholder="e.g. Action, Comedy">
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="status">
-                        <option value="">Select status</option>
-                        <option value="Want to Watch">Want to Watch</option>
-                        <option value="Watching">Watching</option>
-                        <option value="Watched">Watched</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Rating (1-5)</label>
-                    <select id="rating">
-                        <option value="">Not rated</option>
-                        <option value="1">⭐ 1</option>
-                        <option value="2">⭐⭐ 2</option>
-                        <option value="3">⭐⭐⭐ 3</option>
-                        <option value="4">⭐⭐⭐⭐ 4</option>
-                        <option value="5">⭐⭐⭐⭐⭐ 5</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Who Added</label>
-                    <input type="text" id="whoAdded" placeholder="Your name">
-                </div>
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="notes" placeholder="Any thoughts or comments..."></textarea>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn" onclick="closeModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save</button>
-                </div>
-            </form>
+            </div>
         </div>
+        
+        <!-- Watchlist Display Section -->
+        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl">
+            <h2 class="text-2xl font-semibold mb-6 text-white">Our Current Watchlist</h2>
+            <div id="loading-indicator" class="text-center text-gray-500 py-8 text-lg hidden">
+                Loading list...
+            </div>
+            <div id="watchlist-container" class="space-y-4">
+                <!-- Watchlist items will be injected here -->
+                <div class="text-center text-gray-500 py-8 hidden" id="empty-list-message">
+                    The watchlist is empty! Time to add some new content.
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // ============================================
-        // 🔧 CONFIGURATION - EDIT THIS SECTION
-        // ============================================
+        // =========================================================================
+        // 1. CONFIGURATION
+        // =========================================================================
+
+        // !!! IMPORTANT !!!
+        // 1. REPLACE THIS PLACEHOLDER WITH YOUR DEPLOYED GOOGLE APPS SCRIPT URL
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgg3LIz2ZUtzeaLrJi0hYVfscZS5ZymQVup3H311LQO-R9vyy2iDjtZHleze3Ctk0oXAsDzQNTC-fBmPa-z8iLONP862M9jNLqMFaJnRL0rGQR1vJBOy62Y9c-YYsmhy8NoezJJAGw9nBtgaN76ataR_UJPujfbfTSguaHslCwU7VoqbSpIlwt2_ekZcE2q5d8FZu7qy4BfnSUM1lPT2qLJ1idZl0EY4PzMmCsngO4CYLp34EUI2knkldsfRktal8O_K7ERtmc1lmacGW2Dt7_3CwHsxg&lib=MaRlNg26VJCrQpKjOBdZBGM5k6x6jm7gF'; 
+        // 2. REPLACE THIS PLACEHOLDER WITH YOUR ACTUAL OMDB API KEY
+        const OMDB_API_KEY = '379bafb0'; 
+
+        const apiUrl = `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&r=json`;
+
+        // =========================================================================
+        // 2. STATE MANAGEMENT & DOM REFERENCES
+        // =========================================================================
+
+        let currentOMDBResult = null; // Stores the currently selected item from OMDB search
         
-        const CONFIG = {
-            // Your Google Apps Script Web App URL
-            // You'll get this after deploying the script (see instructions below)
-            API_URL: 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgK_UtM_Qx9qswLU6h3HcehiOxPgRWHGg1kMd8baLKk_vT0ikFrhRvCtaCaZBha4C5Mqsz8uN2PpTpgzAL5F4pnstRjuNp1yDni-MNeTgwO-GVA_OCUYTA3cp_uaBX-0lQn5ckJz5zXmeyBYz2tVbBBag1yvBkZbfqmc_RJscO999rNa4r_yRxKshTnM_uiBiIUuFOmIOeFSv5muox2r__e_7Z2cDwM9GtwUY7GCo5PWGdat8w1oddq-GPrrg-iZuFTUHHObHmZIyt3sDpHlRD7Hwfc3Q&lib=MaRlNg26VJCrQpKjOBdZBGM5k6x6jm7gF',
-            // OMDb API Key - Get free key from: https://www.omdbapi.com/apikey.aspx
-            OMDB_API_KEY: '379bafb0'
-        };
+        const watchlistContainer = document.getElementById('watchlist-container');
+        const omdbResultsDiv = document.getElementById('omdb-results');
+        const searchFeedback = document.getElementById('search-feedback');
+        const omdbDetailCard = document.getElementById('omdb-detail-card');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const emptyListMessage = document.getElementById('empty-list-message');
+        const searchInput = document.getElementById('omdb-search-input');
 
-        // ============================================
-        // 📊 APP CODE
-        // ============================================
+        // =========================================================================
+        // 3. GOOGLE APPS SCRIPT (GAS) CONNECTOR
+        // =========================================================================
 
-        let allMovies = [];
-        let currentFilter = 'all';
-        let editingRow = null;
-        let searchTimeout = null;
+        /**
+         * Sends a request to the deployed Google Apps Script (GAS) Web App.
+         * @param {string} action - The action to perform (e.g., 'GET_LIST', 'ADD_ITEM').
+         * @param {Object} data - The data payload.
+         */
+        async function makeGasRequest(action, data = {}) {
+            loadingIndicator.classList.remove('hidden');
 
-        // Movie search functionality
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            clearTimeout(searchTimeout);
-            const query = e.target.value.trim();
+            try {
+                // The GAS endpoint is expecting a JSON payload which is a common setup.
+                // The Content-Type header is often omitted for GAS, but we'll include
+                // the data stringified as the body payload.
+                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                    method: 'POST',
+                    // The body content is typically sent as an object containing the action and data
+                    body: JSON.stringify({ action, ...data }) 
+                });
+
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                
+                // GAS returns a JSON object with { success: bool, data: array/object, error: string }
+                const result = await response.json();
+                return result;
+
+            } catch (error) {
+                console.error('Error contacting Google Apps Script:', error);
+                // Fallback for errors
+                return { success: false, error: 'Failed to communicate with the Google Sheets backend.' };
+            } finally {
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+
+        // =========================================================================
+        // 4. OMDB API LOGIC
+        // =========================================================================
+
+        /**
+         * Fetches movie/show details from the OMDB API.
+         * @param {string} title 
+         */
+        async function searchOMDB(title) {
+            searchFeedback.classList.add('hidden');
+            omdbDetailCard.classList.add('hidden');
             
-            if (query.length < 2) {
-                document.getElementById('searchResults').innerHTML = '';
-                return;
+            if (!OMDB_API_KEY || OMDB_API_KEY === 'YOUR_OMDB_API_KEY') {
+                searchFeedback.textContent = "Error: Please set your OMDB_API_KEY in the script.";
+                searchFeedback.classList.remove('hidden');
+                return null;
             }
 
-            searchTimeout = setTimeout(() => searchMovies(query), 500);
-        });
-
-        async function searchMovies(query) {
-            const resultsDiv = document.getElementById('searchResults');
-            resultsDiv.innerHTML = '<div style="padding: 10px; opacity: 0.7;">Searching...</div>';
-
             try {
-                const response = await fetch(`https://www.omdbapi.com/?apikey=${CONFIG.OMDB_API_KEY}&s=${encodeURIComponent(query)}`);
-                const data = await response.json();
+                searchFeedback.textContent = "Searching OMDB...";
+                searchFeedback.classList.remove('hidden');
 
-                if (data.Response === 'True' && data.Search) {
-                    const results = data.Search.slice(0, 5).map(movie => `
-                        <div class="search-result-item" onclick="selectMovie('${movie.imdbID}')">
-                            <img src="${movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/40x60?text=No+Image'}" alt="">
-                            <div class="search-result-info">
-                                <div class="search-result-title">${movie.Title}</div>
-                                <div class="search-result-meta">${movie.Year} • ${movie.Type}</div>
-                            </div>
-                        </div>
-                    `).join('');
-                    resultsDiv.innerHTML = results;
+                // Exponential backoff setup for fetch retry (up to 3 times)
+                let data = null;
+                for (let i = 0; i < 3; i++) {
+                    const response = await fetch(`${apiUrl}&t=${encodeURIComponent(title)}&plot=short`);
+                    if (response.ok) {
+                        data = await response.json();
+                        break;
+                    }
+                    if (i < 2) {
+                         await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000)); // 1s, 2s delay
+                    } else {
+                        throw new Error('Failed to fetch OMDB data after multiple retries.');
+                    }
+                }
+                
+                searchFeedback.classList.add('hidden');
+
+                if (data.Response === "True") {
+                    currentOMDBResult = data;
+                    renderOMDBResult(data);
+                    return data;
                 } else {
-                    resultsDiv.innerHTML = '<div style="padding: 10px; opacity: 0.7;">No movies found</div>';
+                    currentOMDBResult = null;
+                    searchFeedback.textContent = `Could not find "${title}". Please try a different title.`;
+                    searchFeedback.classList.remove('hidden');
+                    omdbResultsDiv.classList.remove('hidden');
+                    omdbDetailCard.classList.add('hidden');
+                    return null;
                 }
             } catch (error) {
-                resultsDiv.innerHTML = '<div style="padding: 10px; opacity: 0.7;">Search failed</div>';
+                console.error("OMDB Search Error:", error);
+                searchFeedback.textContent = "An error occurred during search. Check console.";
+                searchFeedback.classList.remove('hidden');
+                return null;
             }
         }
 
-        async function selectMovie(imdbID) {
-            try {
-                const response = await fetch(`https://www.omdbapi.com/?apikey=${CONFIG.OMDB_API_KEY}&i=${imdbID}`);
-                const movie = await response.json();
-
-                if (movie.Response === 'True') {
-                    // Auto-fill the form
-                    document.getElementById('title').value = movie.Title;
-                    document.getElementById('year').value = movie.Year;
-                    document.getElementById('genre').value = movie.Genre;
-                    document.getElementById('notes').value = `${movie.Plot}\n\nDirector: ${movie.Director}\nCast: ${movie.Actors}\nIMDb: ${movie.imdbRating}/10`;
-                    
-                    // Clear search
-                    document.getElementById('searchInput').value = '';
-                    document.getElementById('searchResults').innerHTML = '';
-
-                    // Scroll to form
-                    document.getElementById('title').focus();
-                }
-            } catch (error) {
-                alert('Failed to load movie details');
-            }
-        }
-
-        async function loadMovies() {
-            const content = document.getElementById('content');
-            content.innerHTML = '<div class="loading">Loading your movies...</div>';
-
-            try {
-                const response = await fetch(CONFIG.API_URL);
-                if (!response.ok) throw new Error('Failed to fetch data');
-                
-                const data = await response.json();
-                allMovies = data.movies || [];
-                
-                renderStats();
-                renderFilterButtons();
-                renderMovies();
-            } catch (error) {
-                content.innerHTML = `
-                    <div class="error">
-                        <h2>⚠️ Couldn't load movies</h2>
-                        <p>Make sure you've set up the Google Apps Script correctly.</p>
-                        <p style="margin-top: 10px; font-size: 0.9rem; opacity: 0.8;">Error: ${error.message}</p>
-                        <p style="margin-top: 15px;">See setup instructions below the code.</p>
-                    </div>
-                `;
-            }
-        }
-
-        async function saveMovie(movieData) {
-            try {
-                const payload = {
-                    action: editingRow ? 'update' : 'add',
-                    row: editingRow,
-                    data: movieData
-                };
-
-                const response = await fetch(CONFIG.API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                // With no-cors, we can't read the response, so just assume success
-                // and reload to verify
-                closeModal();
-                setTimeout(() => loadMovies(), 1000);
-            } catch (error) {
-                alert('Failed to save movie: ' + error.message);
-            }
-        }
-
-        async function deleteMovie(row) {
-            if (!confirm('Delete this movie?')) return;
-
-            try {
-                await fetch(CONFIG.API_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'delete',
-                        row: row
-                    })
-                });
-
-                // Reload after a brief delay to let the script process
-                setTimeout(() => loadMovies(), 1000);
-            } catch (error) {
-                alert('Failed to delete movie: ' + error.message);
-            }
-        }
-
-        function renderStats() {
-            const stats = {
-                total: allMovies.length,
-                watched: allMovies.filter(m => m.status && m.status.toLowerCase().includes('watched')).length,
-                watching: allMovies.filter(m => m.status && m.status.toLowerCase().includes('watching')).length,
-                toWatch: allMovies.filter(m => m.status && m.status.toLowerCase().includes('want')).length
+        /**
+         * Renders the fetched OMDB data into the detail card.
+         * @param {Object} data - OMDB response object.
+         */
+        function renderOMDBResult(data) {
+            document.getElementById('omdb-title').textContent = data.Title;
+            document.getElementById('omdb-meta').textContent = `${data.Type} | ${data.Year} | Rated: ${data.Rated}`;
+            document.getElementById('omdb-plot').textContent = data.Plot;
+            
+            const posterEl = document.getElementById('omdb-poster');
+            const posterUrl = data.Poster && data.Poster !== 'N/A' ? data.Poster : 'https://placehold.co/96x144/1f2937/d1d5db?text=No+Poster';
+            
+            posterEl.src = posterUrl;
+            posterEl.onerror = () => {
+                posterEl.src = 'https://placehold.co/96x144/1f2937/d1d5db?text=No+Poster';
             };
 
-            document.getElementById('stats').innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-number">${stats.total}</div>
-                    <div class="stat-label">Total Movies</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${stats.watched}</div>
-                    <div class="stat-label">Watched</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${stats.toWatch}</div>
-                    <div class="stat-label">To Watch</div>
-                </div>
-            `;
+            omdbResultsDiv.classList.remove('hidden');
+            omdbDetailCard.classList.remove('hidden');
         }
 
-        function renderFilterButtons() {
-            const statuses = ['all', ...new Set(allMovies.map(m => m.status).filter(s => s))];
-            const buttons = statuses.map(status => {
-                const active = status === currentFilter ? 'active' : '';
-                const label = status === 'all' ? 'All' : status;
-                return `<button class="btn filter-btn ${active}" onclick="filterMovies('${status}')">${label}</button>`;
-            }).join('');
+        function handleSearch() {
+            const title = searchInput.value.trim();
+            if (title) {
+                searchOMDB(title);
+            }
+        }
+
+
+        // =========================================================================
+        // 5. WATCHLIST CRUD OPERATIONS (via GAS)
+        // =========================================================================
+
+        /**
+         * Adds the currently displayed OMDB item to the Google Sheet via GAS.
+         */
+        async function addItemToWatchlist() {
+            if (!currentOMDBResult) return;
+
+            const itemData = {
+                Type: currentOMDBResult.Type,
+                Title: currentOMDBResult.Title,
+                Year: currentOMDBResult.Year,
+                PosterURL: currentOMDBResult.Poster && currentOMDBResult.Poster !== 'N/A' ? currentOMDBResult.Poster : '',
+                IMDB_ID: currentOMDBResult.imdbID,
+            };
+
+            const response = await makeGasRequest('ADD_ITEM', itemData);
             
-            document.getElementById('filterButtons').innerHTML = buttons;
+            if (response.success) {
+                // Clear the input and hide the results card upon success
+                searchInput.value = '';
+                omdbResultsDiv.classList.add('hidden');
+                omdbDetailCard.classList.add('hidden');
+                currentOMDBResult = null;
+                renderWatchlist(response.data);
+            } else {
+                console.error("Failed to add item:", response.error);
+                // In a real app, you would show a custom modal error message here
+            }
         }
 
-        function filterMovies(status) {
-            currentFilter = status;
-            renderFilterButtons();
-            renderMovies();
-        }
+        /**
+         * Deletes an item from the sheet.
+         * @param {string} id - Unique ID of the item (the row number).
+         */
+        async function deleteItem(id) {
+            // WARNING: Due to environment restrictions, we cannot use window.confirm().
+            // In a real app, implement a custom UI modal for confirmation.
+            // For now, we proceed with deletion directly.
+            console.warn(`Proceeding to delete item with ID: ${id}. Please implement a custom confirmation modal.`);
 
-        function renderMovies() {
-            const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+            const response = await makeGasRequest('DELETE_ITEM', { ID: id });
             
-            let filtered = allMovies.filter(movie => {
-                const matchesSearch = (movie.title || '').toLowerCase().includes(searchTerm) ||
-                                    (movie.genre || '').toLowerCase().includes(searchTerm) ||
-                                    (movie.notes || '').toLowerCase().includes(searchTerm);
-                const matchesFilter = currentFilter === 'all' || movie.status === currentFilter;
-                return matchesSearch && matchesFilter;
+            if (response.success) {
+                renderWatchlist(response.data);
+            } else {
+                console.error("Failed to delete item:", response.error);
+            }
+        }
+
+        /**
+         * Toggles the 'Watched' status of an item.
+         * @param {string} id - Unique ID of the item.
+         * @param {boolean} currentStatus - The current 'Watched' status.
+         */
+        async function toggleWatched(id, currentStatus) {
+            const newStatus = !currentStatus;
+            
+            const response = await makeGasRequest('TOGGLE_WATCHED', { 
+                ID: id, 
+                WatchedStatus: newStatus 
             });
 
-            const content = document.getElementById('content');
+            if (response.success) {
+                renderWatchlist(response.data);
+            } else {
+                console.error("Failed to update status:", response.error);
+            }
+        }
+        
+        // =========================================================================
+        // 6. UI RENDERING
+        // =========================================================================
+
+        /**
+         * Renders the main watchlist.
+         * @param {Array<Object>} items - Array of watchlist objects from GAS.
+         */
+        function renderWatchlist(items) {
+            watchlistContainer.innerHTML = '';
             
-            if (filtered.length === 0) {
-                content.innerHTML = '<div class="loading">No movies found 🎬</div>';
+            if (!items || items.length === 0) {
+                emptyListMessage.classList.remove('hidden');
                 return;
             }
+            emptyListMessage.classList.add('hidden');
 
-            const html = `
-                <div class="movies-grid">
-                    ${filtered.map(movie => createMovieCard(movie)).join('')}
-                </div>
-            `;
-            
-            content.innerHTML = html;
-        }
+            items.forEach(item => {
+                // GAS will return boolean or string 'TRUE'/'FALSE'. Normalize to boolean.
+                const isWatched = item.Watched === true || String(item.Watched).toUpperCase() === 'TRUE'; 
 
-        function createMovieCard(movie) {
-            const statusClass = (movie.status || '').toLowerCase().replace(/\s+/g, '-');
-            const rating = movie.rating ? '⭐'.repeat(Math.min(5, parseInt(movie.rating) || 0)) : '';
-            
-            return `
-                <div class="movie-card">
-                    <div class="movie-actions">
-                        <button class="icon-btn" onclick="openEditModal(${movie.row})" title="Edit">✏️</button>
-                        <button class="icon-btn" onclick="deleteMovie(${movie.row})" title="Delete">🗑️</button>
+                const cardClasses = isWatched 
+                    ? 'bg-gray-700 opacity-60 hover:opacity-100 transition duration-300' 
+                    : 'bg-gray-700 ring-4 ring-sky-500/30 hover:ring-sky-500/50 transition duration-300';
+                
+                const titleClasses = isWatched ? 'line-through text-gray-400' : 'text-white';
+                
+                const posterUrl = item.PosterURL && item.PosterURL !== 'N/A' 
+                    ? item.PosterURL 
+                    : `https://placehold.co/80x120/1f2937/d1d5db?text=${item.Type ? item.Type[0] : '?'}`;
+
+                const cardHtml = `
+                    <div class="flex p-4 rounded-xl shadow-lg items-center ${cardClasses}">
+                        <!-- Poster -->
+                        <img src="${posterUrl}" 
+                             onerror="this.onerror=null;this.src='https://placehold.co/80x120/1f2937/d1d5db?text=NO+IMAGE';"
+                             alt="${item.Title} Poster" class="w-16 h-24 sm:w-20 sm:h-30 object-cover rounded-lg mr-4 flex-shrink-0 shadow-md">
+                        
+                        <!-- Details -->
+                        <div class="flex-grow min-w-0">
+                            <h3 class="text-lg font-bold truncate ${titleClasses}">${item.Title} (${item.Year})</h3>
+                            <p class="text-sm text-gray-400">
+                                ${item.Type || 'Unknown'} | Added: ${item.Timestamp ? new Date(item.Timestamp).toLocaleDateString() : 'N/A'}
+                            </p>
+                        </div>
+
+                        <!-- Actions (Flex container to keep buttons together) -->
+                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 ml-4 flex-shrink-0">
+                            <!-- Toggle Watched Button -->
+                            <button onclick="toggleWatched('${item.ID}', ${isWatched})" 
+                                    title="${isWatched ? 'Mark as Unwatched' : 'Mark as Watched'}"
+                                    class="${isWatched ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-600 hover:bg-emerald-700'} text-white p-2 rounded-full transition duration-150 transform hover:scale-105">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    ${isWatched 
+                                        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' // X icon (Unwatched)
+                                        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>' // Check icon (Watched)
+                                    }
+                                </svg>
+                            </button>
+
+                            <!-- Delete Button -->
+                            <button onclick="deleteItem('${item.ID}')" 
+                                    title="Remove from Watchlist"
+                                    class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition duration-150 transform hover:scale-105">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="movie-title">${movie.title || 'Untitled'}</div>
-                    ${movie.status ? `<span class="status ${statusClass}">${movie.status}</span>` : ''}
-                    <div class="movie-meta">
-                        ${movie.year ? `<span class="tag">📅 ${movie.year}</span>` : ''}
-                        ${movie.genre ? `<span class="tag">🎭 ${movie.genre}</span>` : ''}
-                        ${movie.whoAdded ? `<span class="tag">👤 ${movie.whoAdded}</span>` : ''}
-                    </div>
-                    ${rating ? `<div class="rating">${rating}</div>` : ''}
-                    ${movie.notes ? `<div class="notes">${movie.notes}</div>` : ''}
-                </div>
-            `;
+                `;
+                watchlistContainer.insertAdjacentHTML('beforeend', cardHtml);
+            });
         }
 
-        function openAddModal() {
-            editingRow = null;
-            document.getElementById('modalTitle').textContent = 'Add Movie';
-            document.getElementById('movieForm').reset();
-            document.getElementById('searchInput').value = '';
-            document.getElementById('searchResults').innerHTML = '';
-            document.getElementById('movieSearch').style.display = 'block';
-            document.getElementById('movieModal').classList.add('active');
-        }
+        // =========================================================================
+        // 7. INITIALIZATION
+        // =========================================================================
 
-        function openEditModal(row) {
-            editingRow = row;
-            const movie = allMovies.find(m => m.row === row);
-            if (!movie) return;
-
-            document.getElementById('modalTitle').textContent = 'Edit Movie';
-            document.getElementById('movieSearch').style.display = 'none';
-            document.getElementById('title').value = movie.title || '';
-            document.getElementById('year').value = movie.year || '';
-            document.getElementById('genre').value = movie.genre || '';
-            document.getElementById('status').value = movie.status || '';
-            document.getElementById('rating').value = movie.rating || '';
-            document.getElementById('whoAdded').value = movie.whoAdded || '';
-            document.getElementById('notes').value = movie.notes || '';
+        /**
+         * Loads the initial list when the page opens.
+         */
+        async function init() {
+            // Pre-fill search with a common movie for quick testing
+            searchInput.value = 'Inception';
             
-            document.getElementById('movieModal').classList.add('active');
+            const response = await makeGasRequest('GET_LIST');
+            if (response.success) {
+                renderWatchlist(response.data);
+            } else {
+                console.error("Initialization failed:", response.error);
+                loadingIndicator.textContent = `Failed to load list. Please check your GAS_URL and API Key. Details: ${response.error || 'Unknown Error'}`;
+                loadingIndicator.classList.remove('hidden');
+            }
         }
 
-        function closeModal() {
-            document.getElementById('movieModal').classList.remove('active');
-            editingRow = null;
-        }
-
-        // Form submission
-        document.getElementById('movieForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const movieData = {
-                title: document.getElementById('title').value,
-                year: document.getElementById('year').value,
-                genre: document.getElementById('genre').value,
-                status: document.getElementById('status').value,
-                rating: document.getElementById('rating').value,
-                whoAdded: document.getElementById('whoAdded').value,
-                notes: document.getElementById('notes').value
-            };
-
-            saveMovie(movieData);
-        });
-
-        // Close modal on outside click
-        document.getElementById('movieModal').addEventListener('click', (e) => {
-            if (e.target.id === 'movieModal') closeModal();
-        });
-
-        // Search functionality
-        document.getElementById('searchBar').addEventListener('input', renderMovies);
-
-        // Initial load
-        loadMovies();
+        window.onload = init;
+        
     </script>
 </body>
 </html>
