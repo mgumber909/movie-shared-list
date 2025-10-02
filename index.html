@@ -13,7 +13,6 @@
         :root {
             --color-bg-dark: #2d172e; /* Deep Berry/Plum */
             --color-bg-light: #3e283f; /* Lighter Plum */
-            --color-accent-purple: #a78bfa; /* Original Soft Purple (kept for consistency with markers) */
             --color-accent-pink: #f472b6; /* Rose Pink/Fuchsia - Main Accent */
             --color-accent-gold: #fde047; /* Soft Gold/Yellow - Secondary Accent */
             --color-text: #fef3c7; /* Light creamy text */
@@ -68,7 +67,7 @@
         <!-- Header -->
         <header class="text-center mb-8">
             <h1 class="text-4xl md:text-5xl font-extrabold mb-2 tracking-tight" style="color:var(--color-accent-gold);">
-                     Our Date Night Watchlist 💌
+                Our Watchlist 💌
             </h1>
             <p class="text-xl font-medium" style="color:var(--color-text-faded);">
                 What's Next for Us?
@@ -88,15 +87,10 @@
                 <!-- Search Input -->
                 <input type="text" id="searchInput" placeholder="Search for a Movie or Show..." class="w-full p-3 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 focus:outline-none transition duration-150" style="background-color:var(--color-bg-dark);">
                 
-                <div class="flex gap-3 items-center">
-                    <!-- Marker Input -->
-                    <input type="text" id="markerInput" placeholder="Marker (M or S)" maxlength="1" class="w-28 p-3 rounded-xl text-white placeholder-gray-400 text-center uppercase focus:ring-2 focus:ring-pink-400 focus:outline-none transition duration-150" style="background-color:var(--color-bg-dark);">
-
-                    <!-- Search Button -->
-                    <button id="searchButton" class="button-style bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-xl whitespace-nowrap flex-grow">
-                        Search
-                    </button>
-                </div>
+                <!-- Search Button -->
+                <button id="searchButton" class="button-style bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-xl whitespace-nowrap flex-grow">
+                    Search
+                </button>
             </div>
             
             <!-- Search Results Display -->
@@ -107,7 +101,7 @@
 
         <!-- Watchlist Display Section (Unwatched) -->
         <div class="p-6 rounded-2xl card-shadow mb-8 border-t-4" style="background-color:var(--color-bg-light); border-color:var(--color-accent-gold);">
-            <h2 class="text-2xl font-bold mb-6" style="color:var(--color-accent-pink);">🍿 Date Night Queue</h2>
+            <h2 class="text-2xl font-bold mb-6" style="color:var(--color-accent-pink);">🍿 Queue</h2>
             <div id="toWatchList" class="space-y-4">
                 <!-- Unwatched items will be rendered here -->
                 <div class="text-center text-gray-400 italic p-4" id="empty-unwatched-message" style="display: none;">
@@ -118,7 +112,7 @@
 
         <!-- Watched Section -->
         <div class="p-6 rounded-2xl card-shadow border-t-4 border-gray-500" style="background-color:var(--color-bg-light);">
-            <h2 class="text-2xl font-bold mb-6 text-gray-400">✅ Completed Treasures</h2>
+            <h2 class="text-2xl font-bold mb-6 text-gray-400">✅ Completed </h2>
             <div id="watchedList" class="space-y-4">
                 <!-- Watched items will be rendered here -->
                 <div class="text-center text-gray-500 italic p-4" id="empty-watched-message" style="display: none;">
@@ -129,21 +123,20 @@
 
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- JavaScript Logic (M/S Marker functionality removed) -->
     <script>
-        // NOTE: NO CHANGES MADE TO JAVASCRIPT LOGIC TO PREVENT GAS RE-DEPLOYMENT.
         // --- CONSTANTS & CONFIGURATION ---
+        // NOTE: Keeping the URL from your previous successful setup.
         const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyr9LHf_yLV4bBiC0XNnaUszbSB8R2UOebt8ciipu0pkWBPmMIwR3W1BIk5llJAW1F/exec';
         const OMDB_API_KEY = '379bafb0';
         const OMDB_API_URL = 'https://www.omdbapi.com/';
 
         // --- DOM ELEMENTS ---
         const searchInput = document.getElementById('searchInput');
-        const markerInput = document.getElementById('markerInput'); // New Marker Input
         const searchButton = document.getElementById('searchButton');
         const searchResults = document.getElementById('searchResults');
-        const toWatchListContainer = document.getElementById('toWatchList'); // Renamed container
-        const watchedListContainer = document.getElementById('watchedList'); // New container
+        const toWatchListContainer = document.getElementById('toWatchList');
+        const watchedListContainer = document.getElementById('watchedList');
         const messagesContainer = document.getElementById('messages');
         const emptyUnwatchedMessage = document.getElementById('empty-unwatched-message');
         const emptyWatchedMessage = document.getElementById('empty-watched-message');
@@ -176,7 +169,7 @@
         }
 
         /**
-         * Safely makes a POST request to the Google Apps Script Web App.
+         * Safely makes a POST request to the Google Apps Script Web App with retry logic.
          * @param {object} payload - The object containing the 'action' and data.
          * @returns {Promise<object>} The response data from the GAS script.
          */
@@ -184,31 +177,55 @@
             if (isProcessing) return;
             isProcessing = true;
 
+            const MAX_RETRIES = 3;
+            const executeFetch = async (currentAttempt) => {
+                // Exponential backoff: 1s, 2s, 4s delay before retry
+                const delay = Math.pow(2, currentAttempt) * 1000;
+
+                if (currentAttempt > 0) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+
+                try {
+                    const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+    
+                    if (!response.ok) {
+                        // Throw error for bad HTTP status (4xx, 5xx)
+                        const errorText = await response.text();
+                        throw new Error(`HTTP error! status: ${response.status}. Response: ${errorText.substring(0, 50)}...`);
+                    }
+    
+                    const data = await response.json();
+                    
+                    if (data.success === false) {
+                        throw new Error(data.error || "Unknown GAS error.");
+                    }
+    
+                    return data; // Success, return data
+                    
+                } catch (error) {
+                    // This catches both Failed to Fetch (network) and thrown HTTP/GAS errors
+                    if (currentAttempt < MAX_RETRIES - 1) {
+                        // If it's not the final attempt, retry. No console logging of retry attempts.
+                        return executeFetch(currentAttempt + 1); 
+                    } else {
+                        throw error; // Max retries reached, propagate error
+                    }
+                }
+            };
+            
             try {
-                const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                
-                if (data.success === false) {
-                    throw new Error(data.error || "Unknown GAS error.");
-                }
-
-                return data;
-
+                return await executeFetch(0);
             } catch (error) {
-                console.error("GAS Communication Error:", error);
-                displayMessage(`Failed to communicate with the Google Sheets backend. Details: ${error.message}`, 'error');
+                console.error("GAS Communication Error (Max Retries Reached):", error);
+                displayMessage(`Failed to communicate with the Google Sheets backend after ${MAX_RETRIES} attempts. Details: ${error.message.substring(0, 80)}`, 'error');
                 return null;
             } finally {
                 isProcessing = false;
@@ -244,7 +261,7 @@
                 // The GAS script returns the full, updated list, so we just update the UI
                 currentWatchlist = result.data;
                 renderWatchlist();
-                displayMessage(`Toggled to ${newStatus ? 'Watched' : 'Unwatched'}!`, 'success');
+                displayMessage(`Toggled to ${newStatus ? 'Unwatched' : 'Watched'}!`, 'success');
             }
         }
 
@@ -253,7 +270,6 @@
          * @param {number} id - The row ID in the Google Sheet.
          */
         async function deleteItem(id) {
-            // No custom modal for confirmation, proceed directly as per sandbox rules
             const result = await makeGasRequest({
                 action: 'DELETE_ITEM',
                 ID: id
@@ -271,12 +287,6 @@
          * @param {object} item - The OMDB search result object.
          */
         async function addItem(item) {
-            const marker = markerInput.value.trim().toUpperCase();
-            if (!marker || (marker !== 'M' && marker !== 'S')) {
-                 displayMessage("Please enter 'M' or 'S' in the marker field before adding.", 'error');
-                 return;
-            }
-
             const newItem = {
                 action: 'ADD_ITEM',
                 Type: item.Type,
@@ -284,7 +294,6 @@
                 Year: item.Year,
                 PosterURL: item.Poster !== 'N/A' ? item.Poster : '',
                 IMDB_ID: item.imdbID,
-                Marker: marker // NEW: include marker
             };
 
             const result = await makeGasRequest(newItem);
@@ -295,7 +304,6 @@
                 displayMessage(`'${item.Title}' added to the list!`, 'success');
                 searchResults.innerHTML = ''; // Clear search results after adding
                 searchInput.value = ''; // Clear search input
-                markerInput.value = marker; // Keep marker value for easy successive adds
             }
         }
 
@@ -389,11 +397,6 @@
                     : 'border-rose-400/50 hover:bg-opacity-80';
 
                 const typeIcon = item.Type === 'movie' ? '🎬' : '📺';
-                const marker = item.Marker ? String(item.Marker).toUpperCase() : '';
-                
-                // Marker color depends on M or S
-                const markerColor = marker === 'M' ? 'bg-pink-400 text-black' : (marker === 'S' ? 'bg-yellow-300 text-black' : 'bg-gray-500 text-white');
-
 
                 const card = document.createElement('div');
                 card.className = `p-4 rounded-2xl flex items-center gap-4 transition duration-200 border-l-8 ${watchedStyle} card-shadow`;
@@ -410,7 +413,6 @@
                     <div class="flex-grow min-w-0">
                         <div class="flex items-center gap-3">
                             <p class="font-extrabold text-xl truncate ${isWatched ? 'line-through text-gray-400' : 'text-white'}" title="${item.Title}">${item.Title}</p>
-                            ${marker ? `<span class="px-2 py-0.5 text-xs font-bold rounded-full ${markerColor}">${marker}</span>` : ''}
                         </div>
                         <p class="text-sm mt-1" style="color:var(--color-text-faded);">${typeIcon} ${item.Year}</p>
                     </div>
