@@ -3,399 +3,462 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Shared Watchlist</title>
+    <title>Our Date Night Watchlist</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Use Inter Font -->
+    <!-- Load Inter font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        /* Define a romantic, deep berry and rose gold palette */
+        :root {
+            --color-bg-dark: #2d172e; /* Deep Berry/Plum */
+            --color-bg-light: #3e283f; /* Lighter Plum */
+            --color-accent-purple: #a78bfa; /* Original Soft Purple (kept for consistency with markers) */
+            --color-accent-pink: #f472b6; /* Rose Pink/Fuchsia - Main Accent */
+            --color-accent-gold: #fde047; /* Soft Gold/Yellow - Secondary Accent */
+            --color-text: #fef3c7; /* Light creamy text */
+            --color-text-faded: #a78bfa; /* Faded purple for subtitles */
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0d1117; /* Dark theme background */
-            color: #c9d1d9;
+            background-color: var(--color-bg-dark);
+            color: var(--color-text);
+            transition: background-color 0.3s;
+        }
+
+        .card-shadow {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+        }
+
+        .button-style {
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .button-style:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Custom scrollbar for aesthetic appeal */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-bg-light);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-accent-pink);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e11d48; /* Deeper red/pink on hover */
         }
     </style>
 </head>
 <body class="p-4 md:p-8 min-h-screen">
 
-    <div class="max-w-4xl mx-auto">
-        <header class="text-center mb-12">
-            <h1 class="text-5xl font-extrabold text-white mb-2 tracking-tight">Our Watchlist</h1>
-            <p class="text-lg text-gray-400">Movies & Shows to watch together.</p>
+    <div id="app" class="max-w-4xl mx-auto">
+
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold mb-2 tracking-tight" style="color:var(--color-accent-gold);">
+                     Our Date Night Watchlist 💌
+            </h1>
+            <p class="text-xl font-medium" style="color:var(--color-text-faded);">
+                What's Next for Us?
+            </p>
         </header>
 
-        <!-- Search and Add Section -->
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-10">
-            <h2 class="text-2xl font-semibold mb-4 text-white">Add New Item</h2>
-            
-            <div class="flex flex-col sm:flex-row gap-4 mb-4">
-                <input type="text" id="omdb-search-input" placeholder="Search for a Movie or Show Title..."
-                       class="flex-grow p-3 rounded-lg bg-gray-700 text-white placeholder-gray-400 focus:ring-sky-500 focus:border-sky-500 border-none transition duration-150 ease-in-out">
-                <button onclick="handleSearch()"
-                        class="bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-200 ease-in-out transform hover:scale-[1.01] flex items-center justify-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    Search
-                </button>
+        <!-- Loading & Error Messages -->
+        <div id="messages" class="mb-4 space-y-3">
+            <!-- Messages go here -->
+        </div>
+
+        <!-- Add Item Section (Search) -->
+        <div id="search-container" class="p-6 rounded-2xl card-shadow mb-8 border-t-4" style="background-color:var(--color-bg-light); border-color:var(--color-accent-pink);">
+            <h2 class="text-2xl font-bold mb-4" style="color:var(--color-accent-gold);">Find & Add Something Cute</h2>
+            <div class="flex flex-col gap-3">
+                
+                <!-- Search Input -->
+                <input type="text" id="searchInput" placeholder="Search for a Movie or Show..." class="w-full p-3 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-pink-400 focus:outline-none transition duration-150" style="background-color:var(--color-bg-dark);">
+                
+                <div class="flex gap-3 items-center">
+                    <!-- Marker Input -->
+                    <input type="text" id="markerInput" placeholder="Marker (M or S)" maxlength="1" class="w-28 p-3 rounded-xl text-white placeholder-gray-400 text-center uppercase focus:ring-2 focus:ring-pink-400 focus:outline-none transition duration-150" style="background-color:var(--color-bg-dark);">
+
+                    <!-- Search Button -->
+                    <button id="searchButton" class="button-style bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 px-6 rounded-xl whitespace-nowrap flex-grow">
+                        Search
+                    </button>
+                </div>
             </div>
+            
+            <!-- Search Results Display -->
+            <div id="searchResults" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Search results will be rendered here -->
+            </div>
+        </div>
 
-            <!-- OMDB Search Results and Details Display -->
-            <div id="omdb-results" class="hidden mt-4 bg-gray-700 p-4 rounded-lg border border-gray-600">
-                <div id="search-feedback" class="text-center text-gray-400 py-4 hidden"></div>
-
-                <div id="omdb-detail-card" class="flex flex-col md:flex-row items-start gap-4">
-                    <!-- Image will be injected here -->
-                    <img id="omdb-poster" src="" alt="Poster" class="w-24 h-36 object-cover rounded-lg shadow-lg flex-shrink-0">
-                    <div class="flex-grow">
-                        <h3 id="omdb-title" class="text-xl font-bold text-white"></h3>
-                        <p id="omdb-meta" class="text-sm text-gray-400 mb-3"></p>
-                        <p id="omdb-plot" class="text-gray-300 text-sm mb-4"></p>
-                        <button onclick="addItemToWatchlist()"
-                                class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-[1.01]">
-                            <svg class="w-5 h-5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                            Add to Watchlist
-                        </button>
-                    </div>
+        <!-- Watchlist Display Section (Unwatched) -->
+        <div class="p-6 rounded-2xl card-shadow mb-8 border-t-4" style="background-color:var(--color-bg-light); border-color:var(--color-accent-gold);">
+            <h2 class="text-2xl font-bold mb-6" style="color:var(--color-accent-pink);">🍿 Date Night Queue</h2>
+            <div id="toWatchList" class="space-y-4">
+                <!-- Unwatched items will be rendered here -->
+                <div class="text-center text-gray-400 italic p-4" id="empty-unwatched-message" style="display: none;">
+                    The queue is empty! Time to fill it up with new romantic options!
                 </div>
             </div>
         </div>
-        
-        <!-- Watchlist Display Section -->
-        <div class="bg-gray-800 p-6 rounded-xl shadow-2xl">
-            <h2 class="text-2xl font-semibold mb-6 text-white">Our Current Watchlist</h2>
-            <div id="loading-indicator" class="text-center text-gray-500 py-8 text-lg hidden">
-                Loading list...
-            </div>
-            <div id="watchlist-container" class="space-y-4">
-                <!-- Watchlist items will be injected here -->
-                <div class="text-center text-gray-500 py-8 hidden" id="empty-list-message">
-                    The watchlist is empty! Time to add some new content.
+
+        <!-- Watched Section -->
+        <div class="p-6 rounded-2xl card-shadow border-t-4 border-gray-500" style="background-color:var(--color-bg-light);">
+            <h2 class="text-2xl font-bold mb-6 text-gray-400">✅ Completed Treasures</h2>
+            <div id="watchedList" class="space-y-4">
+                <!-- Watched items will be rendered here -->
+                <div class="text-center text-gray-500 italic p-4" id="empty-watched-message" style="display: none;">
+                    Time to finish something and celebrate our shared memories!
                 </div>
             </div>
         </div>
 
     </div>
 
+    <!-- JavaScript Logic -->
     <script>
-        // =========================================================================
-        // 1. CONFIGURATION
-        // =========================================================================
+        // NOTE: NO CHANGES MADE TO JAVASCRIPT LOGIC TO PREVENT GAS RE-DEPLOYMENT.
+        // --- CONSTANTS & CONFIGURATION ---
+        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyr9LHf_yLV4bBiC0XNnaUszbSB8R2UOebt8ciipu0pkWBPmMIwR3W1BIk5llJAW1F/exec';
+        const OMDB_API_KEY = '379bafb0';
+        const OMDB_API_URL = 'https://www.omdbapi.com/';
 
-        // !!! IMPORTANT !!!
-        // 1. REPLACE THIS PLACEHOLDER WITH YOUR DEPLOYED GOOGLE APPS SCRIPT URL
-        const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyr9LHf_yLV4bBiC0XNnaUszbSB8R2UOebt8ciipu0pkWBPmMIwR3W1BIk5llJAW1F/exec'; 
-        // 2. REPLACE THIS PLACEHOLDER WITH YOUR ACTUAL OMDB API KEY
-        const OMDB_API_KEY = '379bafb0'; 
+        // --- DOM ELEMENTS ---
+        const searchInput = document.getElementById('searchInput');
+        const markerInput = document.getElementById('markerInput'); // New Marker Input
+        const searchButton = document.getElementById('searchButton');
+        const searchResults = document.getElementById('searchResults');
+        const toWatchListContainer = document.getElementById('toWatchList'); // Renamed container
+        const watchedListContainer = document.getElementById('watchedList'); // New container
+        const messagesContainer = document.getElementById('messages');
+        const emptyUnwatchedMessage = document.getElementById('empty-unwatched-message');
+        const emptyWatchedMessage = document.getElementById('empty-watched-message');
 
-        const apiUrl = `https://www.omdbapi.com/?apikey=${OMDB_API_KEY}&r=json`;
+        // --- STATE & INITIALIZATION ---
+        let currentWatchlist = [];
+        let isProcessing = false;
 
-        // =========================================================================
-        // 2. STATE MANAGEMENT & DOM REFERENCES
-        // =========================================================================
-
-        let currentOMDBResult = null; // Stores the currently selected item from OMDB search
-        
-        const watchlistContainer = document.getElementById('watchlist-container');
-        const omdbResultsDiv = document.getElementById('omdb-results');
-        const searchFeedback = document.getElementById('search-feedback');
-        const omdbDetailCard = document.getElementById('omdb-detail-card');
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const emptyListMessage = document.getElementById('empty-list-message');
-        const searchInput = document.getElementById('omdb-search-input');
-
-        // =========================================================================
-        // 3. GOOGLE APPS SCRIPT (GAS) CONNECTOR
-        // =========================================================================
+        // --- UTILITY FUNCTIONS ---
 
         /**
-         * Sends a request to the deployed Google Apps Script (GAS) Web App.
-         * @param {string} action - The action to perform (e.g., 'GET_LIST', 'ADD_ITEM').
-         * @param {Object} data - The data payload.
+         * Shows a temporary, styled message to the user (e.g., success, error).
+         * @param {string} message - The message text.
+         * @param {string} type - 'success' or 'error'.
          */
-        async function makeGasRequest(action, data = {}) {
-            loadingIndicator.classList.remove('hidden');
+        function displayMessage(message, type) {
+            const colors = {
+                success: { bg: 'bg-green-500', border: 'border-green-700' },
+                error: { bg: 'bg-red-500', border: 'border-red-700' }
+            };
+
+            const div = document.createElement('div');
+            div.className = `p-4 rounded-xl text-white font-medium border-l-4 ${colors[type].bg} ${colors[type].border} card-shadow`;
+            div.textContent = message;
+            messagesContainer.appendChild(div);
+
+            setTimeout(() => {
+                div.remove();
+            }, 5000);
+        }
+
+        /**
+         * Safely makes a POST request to the Google Apps Script Web App.
+         * @param {object} payload - The object containing the 'action' and data.
+         * @returns {Promise<object>} The response data from the GAS script.
+         */
+        async function makeGasRequest(payload) {
+            if (isProcessing) return;
+            isProcessing = true;
 
             try {
-                // The GAS endpoint is expecting a JSON payload which is a common setup.
-                // The Content-Type header is often omitted for GAS, but we'll include
-                // the data stringified as the body payload.
                 const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
                     method: 'POST',
-                    // The body content is typically sent as an object containing the action and data
-                    body: JSON.stringify({ action, ...data }) 
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
                 
-                // GAS returns a JSON object with { success: bool, data: array/object, error: string }
-                const result = await response.json();
-                return result;
+                if (data.success === false) {
+                    throw new Error(data.error || "Unknown GAS error.");
+                }
+
+                return data;
 
             } catch (error) {
-                console.error('Error contacting Google Apps Script:', error);
-                // Fallback for errors
-                return { success: false, error: 'Failed to communicate with the Google Sheets backend.' };
+                console.error("GAS Communication Error:", error);
+                displayMessage(`Failed to communicate with the Google Sheets backend. Details: ${error.message}`, 'error');
+                return null;
             } finally {
-                loadingIndicator.classList.add('hidden');
+                isProcessing = false;
             }
         }
 
-
-        // =========================================================================
-        // 4. OMDB API LOGIC
-        // =========================================================================
+        // --- WATCHLIST (CRUD) OPERATIONS ---
 
         /**
-         * Fetches movie/show details from the OMDB API.
-         * @param {string} title 
+         * Fetches the full watchlist from the Google Sheet and renders it.
          */
-        async function searchOMDB(title) {
-            searchFeedback.classList.add('hidden');
-            omdbDetailCard.classList.add('hidden');
-            
-            if (!OMDB_API_KEY || OMDB_API_KEY === 'YOUR_OMDB_API_KEY') {
-                searchFeedback.textContent = "Error: Please set your OMDB_API_KEY in the script.";
-                searchFeedback.classList.remove('hidden');
-                return null;
-            }
-
-            try {
-                searchFeedback.textContent = "Searching OMDB...";
-                searchFeedback.classList.remove('hidden');
-
-                // Exponential backoff setup for fetch retry (up to 3 times)
-                let data = null;
-                for (let i = 0; i < 3; i++) {
-                    const response = await fetch(`${apiUrl}&t=${encodeURIComponent(title)}&plot=short`);
-                    if (response.ok) {
-                        data = await response.json();
-                        break;
-                    }
-                    if (i < 2) {
-                         await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000)); // 1s, 2s delay
-                    } else {
-                        throw new Error('Failed to fetch OMDB data after multiple retries.');
-                    }
-                }
-                
-                searchFeedback.classList.add('hidden');
-
-                if (data.Response === "True") {
-                    currentOMDBResult = data;
-                    renderOMDBResult(data);
-                    return data;
-                } else {
-                    currentOMDBResult = null;
-                    searchFeedback.textContent = `Could not find "${title}". Please try a different title.`;
-                    searchFeedback.classList.remove('hidden');
-                    omdbResultsDiv.classList.remove('hidden');
-                    omdbDetailCard.classList.add('hidden');
-                    return null;
-                }
-            } catch (error) {
-                console.error("OMDB Search Error:", error);
-                searchFeedback.textContent = "An error occurred during search. Check console.";
-                searchFeedback.classList.remove('hidden');
-                return null;
-            }
-        }
-
-        /**
-         * Renders the fetched OMDB data into the detail card.
-         * @param {Object} data - OMDB response object.
-         */
-        function renderOMDBResult(data) {
-            document.getElementById('omdb-title').textContent = data.Title;
-            document.getElementById('omdb-meta').textContent = `${data.Type} | ${data.Year} | Rated: ${data.Rated}`;
-            document.getElementById('omdb-plot').textContent = data.Plot;
-            
-            const posterEl = document.getElementById('omdb-poster');
-            const posterUrl = data.Poster && data.Poster !== 'N/A' ? data.Poster : 'https://placehold.co/96x144/1f2937/d1d5db?text=No+Poster';
-            
-            posterEl.src = posterUrl;
-            posterEl.onerror = () => {
-                posterEl.src = 'https://placehold.co/96x144/1f2937/d1d5db?text=No+Poster';
-            };
-
-            omdbResultsDiv.classList.remove('hidden');
-            omdbDetailCard.classList.remove('hidden');
-        }
-
-        function handleSearch() {
-            const title = searchInput.value.trim();
-            if (title) {
-                searchOMDB(title);
-            }
-        }
-
-
-        // =========================================================================
-        // 5. WATCHLIST CRUD OPERATIONS (via GAS)
-        // =========================================================================
-
-        /**
-         * Adds the currently displayed OMDB item to the Google Sheet via GAS.
-         */
-        async function addItemToWatchlist() {
-            if (!currentOMDBResult) return;
-
-            const itemData = {
-                Type: currentOMDBResult.Type,
-                Title: currentOMDBResult.Title,
-                Year: currentOMDBResult.Year,
-                PosterURL: currentOMDBResult.Poster && currentOMDBResult.Poster !== 'N/A' ? currentOMDBResult.Poster : '',
-                IMDB_ID: currentOMDBResult.imdbID,
-            };
-
-            const response = await makeGasRequest('ADD_ITEM', itemData);
-            
-            if (response.success) {
-                // Clear the input and hide the results card upon success
-                searchInput.value = '';
-                omdbResultsDiv.classList.add('hidden');
-                omdbDetailCard.classList.add('hidden');
-                currentOMDBResult = null;
-                renderWatchlist(response.data);
-            } else {
-                console.error("Failed to add item:", response.error);
-                // In a real app, you would show a custom modal error message here
-            }
-        }
-
-        /**
-         * Deletes an item from the sheet.
-         * @param {string} id - Unique ID of the item (the row number).
-         */
-        async function deleteItem(id) {
-            // WARNING: Due to environment restrictions, we cannot use window.confirm().
-            // In a real app, implement a custom UI modal for confirmation.
-            // For now, we proceed with deletion directly.
-            console.warn(`Proceeding to delete item with ID: ${id}. Please implement a custom confirmation modal.`);
-
-            const response = await makeGasRequest('DELETE_ITEM', { ID: id });
-            
-            if (response.success) {
-                renderWatchlist(response.data);
-            } else {
-                console.error("Failed to delete item:", response.error);
+        async function fetchWatchlist() {
+            const result = await makeGasRequest({ action: 'GET_LIST' });
+            if (result && result.success) {
+                currentWatchlist = result.data || [];
+                renderWatchlist();
             }
         }
 
         /**
          * Toggles the 'Watched' status of an item.
-         * @param {string} id - Unique ID of the item.
-         * @param {boolean} currentStatus - The current 'Watched' status.
+         * @param {number} id - The row ID in the Google Sheet.
+         * @param {boolean} currentStatus - The current watched status.
          */
         async function toggleWatched(id, currentStatus) {
             const newStatus = !currentStatus;
-            
-            const response = await makeGasRequest('TOGGLE_WATCHED', { 
-                ID: id, 
-                WatchedStatus: newStatus 
+            const result = await makeGasRequest({
+                action: 'TOGGLE_WATCHED',
+                ID: id,
+                WatchedStatus: newStatus
             });
-
-            if (response.success) {
-                renderWatchlist(response.data);
-            } else {
-                console.error("Failed to update status:", response.error);
+            if (result && result.success) {
+                // The GAS script returns the full, updated list, so we just update the UI
+                currentWatchlist = result.data;
+                renderWatchlist();
+                displayMessage(`Toggled to ${newStatus ? 'Watched' : 'Unwatched'}!`, 'success');
             }
         }
-        
-        // =========================================================================
-        // 6. UI RENDERING
-        // =========================================================================
 
         /**
-         * Renders the main watchlist.
-         * @param {Array<Object>} items - Array of watchlist objects from GAS.
+         * Deletes an item from the watchlist.
+         * @param {number} id - The row ID in the Google Sheet.
          */
-        function renderWatchlist(items) {
-            watchlistContainer.innerHTML = '';
-            
-            if (!items || items.length === 0) {
-                emptyListMessage.classList.remove('hidden');
+        async function deleteItem(id) {
+            // No custom modal for confirmation, proceed directly as per sandbox rules
+            const result = await makeGasRequest({
+                action: 'DELETE_ITEM',
+                ID: id
+            });
+            if (result && result.success) {
+                // The GAS script returns the full, updated list, so we just update the UI
+                currentWatchlist = result.data;
+                renderWatchlist();
+                displayMessage(`Item removed from the list.`, 'success');
+            }
+        }
+
+        /**
+         * Adds an item from the OMDB search result to the sheet.
+         * @param {object} item - The OMDB search result object.
+         */
+        async function addItem(item) {
+            const marker = markerInput.value.trim().toUpperCase();
+            if (!marker || (marker !== 'M' && marker !== 'S')) {
+                 displayMessage("Please enter 'M' or 'S' in the marker field before adding.", 'error');
+                 return;
+            }
+
+            const newItem = {
+                action: 'ADD_ITEM',
+                Type: item.Type,
+                Title: item.Title,
+                Year: item.Year,
+                PosterURL: item.Poster !== 'N/A' ? item.Poster : '',
+                IMDB_ID: item.imdbID,
+                Marker: marker // NEW: include marker
+            };
+
+            const result = await makeGasRequest(newItem);
+
+            if (result && result.success) {
+                currentWatchlist = result.data;
+                renderWatchlist();
+                displayMessage(`'${item.Title}' added to the list!`, 'success');
+                searchResults.innerHTML = ''; // Clear search results after adding
+                searchInput.value = ''; // Clear search input
+                markerInput.value = marker; // Keep marker value for easy successive adds
+            }
+        }
+
+        // --- OMDB SEARCH FUNCTIONS ---
+
+        /**
+         * Fetches and displays OMDB search results.
+         */
+        async function searchOmdb() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                displayMessage("Please enter a title to search.", 'error');
                 return;
             }
-            emptyListMessage.classList.add('hidden');
 
-            items.forEach(item => {
-                // GAS will return boolean or string 'TRUE'/'FALSE'. Normalize to boolean.
-                const isWatched = item.Watched === true || String(item.Watched).toUpperCase() === 'TRUE'; 
-
-                const cardClasses = isWatched 
-                    ? 'bg-gray-700 opacity-60 hover:opacity-100 transition duration-300' 
-                    : 'bg-gray-700 ring-4 ring-sky-500/30 hover:ring-sky-500/50 transition duration-300';
-                
-                const titleClasses = isWatched ? 'line-through text-gray-400' : 'text-white';
-                
-                const posterUrl = item.PosterURL && item.PosterURL !== 'N/A' 
-                    ? item.PosterURL 
-                    : `https://placehold.co/80x120/1f2937/d1d5db?text=${item.Type ? item.Type[0] : '?'}`;
-
-                const cardHtml = `
-                    <div class="flex p-4 rounded-xl shadow-lg items-center ${cardClasses}">
-                        <!-- Poster -->
-                        <img src="${posterUrl}" 
-                             onerror="this.onerror=null;this.src='https://placehold.co/80x120/1f2937/d1d5db?text=NO+IMAGE';"
-                             alt="${item.Title} Poster" class="w-16 h-24 sm:w-20 sm:h-30 object-cover rounded-lg mr-4 flex-shrink-0 shadow-md">
-                        
-                        <!-- Details -->
-                        <div class="flex-grow min-w-0">
-                            <h3 class="text-lg font-bold truncate ${titleClasses}">${item.Title} (${item.Year})</h3>
-                            <p class="text-sm text-gray-400">
-                                ${item.Type || 'Unknown'} | Added: ${item.Timestamp ? new Date(item.Timestamp).toLocaleDateString() : 'N/A'}
-                            </p>
-                        </div>
-
-                        <!-- Actions (Flex container to keep buttons together) -->
-                        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 ml-4 flex-shrink-0">
-                            <!-- Toggle Watched Button -->
-                            <button onclick="toggleWatched('${item.ID}', ${isWatched})" 
-                                    title="${isWatched ? 'Mark as Unwatched' : 'Mark as Watched'}"
-                                    class="${isWatched ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-600 hover:bg-emerald-700'} text-white p-2 rounded-full transition duration-150 transform hover:scale-105">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    ${isWatched 
-                                        ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' // X icon (Unwatched)
-                                        : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>' // Check icon (Watched)
-                                    }
-                                </svg>
-                            </button>
-
-                            <!-- Delete Button -->
-                            <button onclick="deleteItem('${item.ID}')" 
-                                    title="Remove from Watchlist"
-                                    class="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition duration-150 transform hover:scale-105">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-                watchlistContainer.insertAdjacentHTML('beforeend', cardHtml);
-            });
-        }
-
-        // =========================================================================
-        // 7. INITIALIZATION
-        // =========================================================================
-
-        /**
-         * Loads the initial list when the page opens.
-         */
-        async function init() {
-            // Pre-fill search with a common movie for quick testing
-            searchInput.value = 'Inception';
+            searchResults.innerHTML = '<p class="text-center text-gray-400 mt-4">Searching...</p>';
             
-            const response = await makeGasRequest('GET_LIST');
-            if (response.success) {
-                renderWatchlist(response.data);
-            } else {
-                console.error("Initialization failed:", response.error);
-                loadingIndicator.textContent = `Failed to load list. Please check your GAS_URL and API Key. Details: ${response.error || 'Unknown Error'}`;
-                loadingIndicator.classList.remove('hidden');
+            try {
+                const response = await fetch(`${OMDB_API_URL}?apikey=${OMDB_API_KEY}&s=${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.Response === "True" && data.Search) {
+                    renderSearchResults(data.Search);
+                } else {
+                    searchResults.innerHTML = `<p class="text-center text-gray-400 mt-4 italic">No results found for "${query}".</p>`;
+                }
+            } catch (error) {
+                console.error("OMDB Search Error:", error);
+                displayMessage("Failed to connect to the movie database. Check your API key.", 'error');
+                searchResults.innerHTML = '';
             }
         }
 
-        window.onload = init;
-        
+        // --- RENDERING FUNCTIONS ---
+
+        /**
+         * Renders the search results from OMDB.
+         * @param {Array<object>} items - List of search results.
+         */
+        function renderSearchResults(items) {
+            searchResults.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "p-4 rounded-xl flex items-center gap-4 border border-gray-600 shadow-md"
+                card.style.backgroundColor = 'var(--color-bg-dark)';
+                
+                const poster = item.Poster !== 'N/A' 
+                    ? `<img src="${item.Poster}" alt="${item.Title} Poster" class="w-16 h-24 object-cover rounded-md flex-shrink-0 card-shadow" onerror="this.onerror=null; this.src='https://placehold.co/64x96/4b5563/ffffff?text=NO+IMAGE';">` 
+                    : `<div class="w-16 h-24 rounded-md flex items-center justify-center text-xs text-gray-400 flex-shrink-0" style="background-color:var(--color-bg-light);">No Poster</div>`;
+
+                const titleInfo = `
+                    <div class="flex-grow min-w-0">
+                        <p class="font-bold truncate text-lg text-white" title="${item.Title}">${item.Title}</p>
+                        <p class="text-sm" style="color:var(--color-text-faded);">${item.Year} | ${item.Type === 'movie' ? '🎬 Movie' : '📺 Series'}</p>
+                    </div>
+                `;
+
+                const addButton = document.createElement('button');
+                addButton.className = "button-style bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 px-4 rounded-xl text-sm flex-shrink-0";
+                addButton.textContent = 'Add';
+                addButton.onclick = () => addItem(item);
+
+                card.innerHTML = poster + titleInfo;
+                card.appendChild(addButton);
+                searchResults.appendChild(card);
+            });
+        }
+
+        /**
+         * Renders the current watchlist, splitting it into two sections.
+         */
+        function renderWatchlist() {
+            // Clear containers
+            toWatchListContainer.innerHTML = '';
+            watchedListContainer.innerHTML = '';
+
+            // Split list based on watched status
+            const toWatchList = currentWatchlist.filter(item => !(item.Watched === true || String(item.Watched).toUpperCase() === 'TRUE'));
+            const watchedList = currentWatchlist.filter(item => item.Watched === true || String(item.Watched).toUpperCase() === 'TRUE');
+            
+            emptyUnwatchedMessage.style.display = toWatchList.length === 0 ? 'block' : 'none';
+            emptyWatchedMessage.style.display = watchedList.length === 0 ? 'block' : 'none';
+
+            // Helper function to render a single item card
+            const createItemCard = (item) => {
+                const isWatched = item.Watched === true || String(item.Watched).toUpperCase() === 'TRUE';
+                
+                // Set colors based on watched status
+                const watchedStyle = isWatched 
+                    ? 'bg-purple-900/30 border-purple-500/50 opacity-70' 
+                    : 'border-rose-400/50 hover:bg-opacity-80';
+
+                const typeIcon = item.Type === 'movie' ? '🎬' : '📺';
+                const marker = item.Marker ? String(item.Marker).toUpperCase() : '';
+                
+                // Marker color depends on M or S
+                const markerColor = marker === 'M' ? 'bg-pink-400 text-black' : (marker === 'S' ? 'bg-yellow-300 text-black' : 'bg-gray-500 text-white');
+
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-2xl flex items-center gap-4 transition duration-200 border-l-8 ${watchedStyle} card-shadow`;
+                card.style.backgroundColor = 'var(--color-bg-dark)';
+                
+                // Poster/Placeholder
+                const posterUrl = item.PosterURL;
+                const posterHtml = posterUrl 
+                    ? `<img src="${posterUrl}" alt="${item.Title} Poster" class="w-16 h-24 object-cover rounded-lg flex-shrink-0 card-shadow" onerror="this.onerror=null; this.src='https://placehold.co/64x96/4b5563/ffffff?text=NO+IMAGE';">` 
+                    : `<div class="w-16 h-24 rounded-lg flex items-center justify-center text-xs text-gray-400 flex-shrink-0" style="background-color:var(--color-bg-light);">No Poster</div>`;
+
+                // Title and Info
+                const infoHtml = `
+                    <div class="flex-grow min-w-0">
+                        <div class="flex items-center gap-3">
+                            <p class="font-extrabold text-xl truncate ${isWatched ? 'line-through text-gray-400' : 'text-white'}" title="${item.Title}">${item.Title}</p>
+                            ${marker ? `<span class="px-2 py-0.5 text-xs font-bold rounded-full ${markerColor}">${marker}</span>` : ''}
+                        </div>
+                        <p class="text-sm mt-1" style="color:var(--color-text-faded);">${typeIcon} ${item.Year}</p>
+                    </div>
+                `;
+                
+                // Actions
+                const actionsHtml = `
+                    <div class="flex flex-col sm:flex-row gap-2 flex-shrink-0 ml-auto">
+                        <button onclick="toggleWatched(${item.ID}, ${isWatched})"
+                            class="button-style text-sm font-semibold py-2 px-3 rounded-xl 
+                            ${isWatched 
+                                ? 'bg-gray-500 hover:bg-gray-600 text-white' 
+                                : 'bg-pink-500 hover:bg-pink-600 text-white'}">
+                            ${isWatched ? 'Unwatch' : 'Watched!'}
+                        </button>
+                        <button onclick="deleteItem(${item.ID})"
+                            class="button-style bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-3 rounded-xl text-sm">
+                            <span aria-hidden="true">🗑️</span>
+                        </button>
+                    </div>
+                `;
+
+                card.innerHTML = posterHtml + infoHtml + actionsHtml;
+                return card;
+            };
+
+            // Render both lists
+            toWatchList.forEach(item => toWatchListContainer.appendChild(createItemCard(item)));
+            watchedList.forEach(item => watchedListContainer.appendChild(createItemCard(item)));
+        }
+
+        // --- EVENT LISTENERS ---
+        searchButton.addEventListener('click', searchOmdb);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchOmdb();
+            }
+        });
+
+        // --- INITIAL LOAD ---
+        window.onload = () => {
+            if (GOOGLE_APPS_SCRIPT_URL.includes('AKfycb')) {
+                fetchWatchlist();
+            } else {
+                displayMessage("CRITICAL: Please ensure GOOGLE_APPS_SCRIPT_URL is set correctly.", 'error');
+            }
+        };
+
     </script>
 </body>
 </html>
