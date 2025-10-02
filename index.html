@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            background: white;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .filter-btn.active {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-bar {
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            min-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            animation: fadeIn 0.8s ease-out 0.4s both;
+        }
+
+        .movie-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .movie-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .movie-meta {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .status {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .status.watched {
+            background: rgba(52, 211, 153, 0.3);
+            color: #d1fae5;
+        }
+
+        .status.watching {
+            background: rgba(251, 191, 36, 0.3);
+            color: #fef3c7;
+        }
+
+        .status.want-to-watch {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fee2e2;
+        }
+
+        .rating {
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        .notes {
+            opacity: 0.9;
+            line-height: 1.5;
+            margin-top: 10px;
+            font-size: 0.95rem;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            padding: 50px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 20px 0;
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            animation: fadeIn 0.8s ease-out 0.3s both;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 20px 30px;
+            border-radius: 15px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .movies-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-bar {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Movie List</h1>
+            <p class="subtitle">Your shared collection</p>
+        </header>
+
+        <div class="stats" id="stats"></div>
+
+        <div class="controls">
+            <a href="" class="btn btn-primary" id="editBtn" target="_blank">✏️ Edit in Google Sheets</a>
+            <button class="btn" onclick="loadMovies()">🔄 Refresh</button>
+            <input type="text" class="search-bar" id="searchBar" placeholder="Search movies...">
+        </div>
+
+        <div class="controls filter-buttons" id="filterButtons"></div>
+
+        <div id="content">
+            <div class="loading">Loading your movies...</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // 🔧 CONFIGURATION - EDIT THIS SECTION
+        // ============================================
+        
+        const CONFIG = {
+            // Your Google Sheet ID (from the URL)
+            // Example: If URL is https://docs.google.com/spreadsheets/d/ABCD1234xyz/edit
+            // Then SHEET_ID is: ABCD1234xyz
+            SHEET_ID: 'Y2PACX-1vTyi7BiiKegzvs_e-cyOV2d_aLXgnaLlBve2ufAe43OdSX7Xj-c3UsGzRXmdVA4Zg_4f9t3UwQFA5wS',
+            
+            // The name of your sheet tab (usually "Sheet1")
+            SHEET_NAME: 'Sheet1',
+            
+            // Column mapping (A=0, B=1, C=2, etc.)
+            // Adjust these if your columns are in different order
+            COLUMNS: {
+                TITLE: 0,      // Column A
+                YEAR: 1,       // Column B
+                GENRE: 2,      // Column C
+                STATUS: 3,     // Column D
+                RATING: 4,     // Column E
+                WHO_ADDED: 5,  // Column F
+                NOTES: 6       // Column G
+            }
+        };
+
+        // ============================================
+        // 📊 APP CODE - No need to edit below
+        // ============================================
+
+        let allMovies = [];
+        let currentFilter = 'all';
+
+        // Set the edit button URL
+        document.getElementById('editBtn').href = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/edit`;
+
+        async function loadMovies() {
+            const content = document.getElementById('content');
+            content.innerHTML = '<div class="loading">Loading your movies...</div>';
+
+            try {
+                // Using CSV export (requires sheet to be published)
+                const url = `https://docs.google.com/spreadsheets/d/${CONFIG.SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${CONFIG.SHEET_NAME}`;
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                
+                const csvText = await response.text();
+                allMovies = parseCSV(csvText);
+                
+                renderStats();
+                renderFilterButtons();
+                renderMovies();
+            } catch (error) {
+                content.innerHTML = `
+                    <div class="error">
+                        <h2>⚠️ Couldn't load movies</h2>
+                        <p>Make sure your Google Sheet is published to the web:</p>
+                        <p>File → Share → Publish to web → Publish</p>
+                        <p style="margin-top: 15px; font-size: 0.9rem;">Sheet ID: ${CONFIG.SHEET_ID}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n').filter(line => line.trim());
+            const movies = [];
+            
+            for (let i = 1; i < lines.length; i++) { // Skip header
+                const values = parseCSVLine(lines[i]);
+                if (values[CONFIG.COLUMNS.TITLE]) {
+                    movies.push({
+                        title: values[CONFIG.COLUMNS.TITLE] || '',
+                        year: values[CONFIG.COLUMNS.YEAR] || '',
+                        genre: values[CONFIG.COLUMNS.GENRE] || '',
+                        status: values[CONFIG.COLUMNS.STATUS] || '',
+                        rating: values[CONFIG.COLUMNS.RATING] || '',
+                        whoAdded: values[CONFIG.COLUMNS.WHO_ADDED] || '',
+                        notes: values[CONFIG.COLUMNS.NOTES] || ''
+                    });
+                }
+            }
+            
+            return movies;
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.trim());
+            
+            return result;
+        }
+
+        function renderStats() {
+            const stats = {
+                total: allMovies.length,
+                watched: allMovies.filter(m => m.status.toLowerCase().includes('watched')).length,
+                watching: allMovies.filter(m => m.status.toLowerCase().includes('watching')).length,
+                toWatch: allMovies.filter(m => m.status.toLowerCase().includes('want')).length
+            };
+
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${stats.total}</div>
+                    <div class="stat-label">Total Movies</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.watched}</div>
+                    <div class="stat-label">Watched</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${stats.toWatch}</div>
+                    <div class="stat-label">To Watch</div>
+                </div>
+            `;
+        }
+
+        function renderFilterButtons() {
+            const statuses = ['all', ...new Set(allMovies.map(m => m.status).filter(s => s))];
+            const buttons = statuses.map(status => {
+                const active = status === currentFilter ? 'active' : '';
+                const label = status === 'all' ? 'All' : status;
+                return `<button class="btn filter-btn ${active}" onclick="filterMovies('${status}')">${label}</button>`;
+            }).join('');
+            
+            document.getElementById('filterButtons').innerHTML = buttons;
+        }
+
+        function filterMovies(status) {
+            currentFilter = status;
+            renderFilterButtons();
+            renderMovies();
+        }
+
+        function renderMovies() {
+            const searchTerm = document.getElementById('searchBar').value.toLowerCase();
+            
+            let filtered = allMovies.filter(movie => {
+                const matchesSearch = movie.title.toLowerCase().includes(searchTerm) ||
+                                    movie.genre.toLowerCase().includes(searchTerm) ||
+                                    movie.notes.toLowerCase().includes(searchTerm);
+                const matchesFilter = currentFilter === 'all' || movie.status === currentFilter;
+                return matchesSearch && matchesFilter;
+            });
+
+            const content = document.getElementById('content');
+            
+            if (filtered.length === 0) {
+                content.innerHTML = '<div class="loading">No movies found 🎬</div>';
+                return;
+            }
+
+            const html = `
+                <div class="movies-grid">
+                    ${filtered.map(movie => createMovieCard(movie)).join('')}
+                </div>
+            `;
+            
+            content.innerHTML = html;
+        }
+
+        function createMovieCard(movie) {
+            const statusClass = movie.status.toLowerCase().replace(/\s+/g, '-');
+            const rating = movie.rating ? '⭐'.repeat(Math.min(5, parseInt(movie.rating) || 0)) : '';
+            
+            return `
+                <div class="movie-card">
+                    <div class="movie-title">${movie.title}</div>
+                    ${movie.status ? `<span class="status ${statusClass}">${movie.status}</span>` : ''}
+                    <div class="movie-meta">
+                        ${movie.year ? `<span class="tag">📅 ${movie.year}</span>` : ''}
+                        ${movie.genre ? `<span class="tag">🎭 ${movie.genre}</span>` : ''}
+                        ${movie.whoAdded ? `<span class="tag">👤 ${movie.whoAdded}</span>` : ''}
+                    </div>
+                    ${rating ? `<div class="rating">${rating}</div>` : ''}
+                    ${movie.notes ? `<div class="notes">${movie.notes}</div>` : ''}
+                </div>
+            `;
+        }
+
+        // Search functionality
+        document.getElementById('searchBar').addEventListener('input', renderMovies);
+
+        // Initial load
+        loadMovies();
+    </script>
+</body>
+</html>
