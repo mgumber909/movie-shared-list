@@ -562,6 +562,7 @@
             // Your Google Apps Script Web App URL
             // You'll get this after deploying the script (see instructions below)
             API_URL: 'https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLgxXyOo2-pJ7DrRhLlO8XK83ZkpNyWttJOrMAh_y9okrpcIgf3n2aCEDtJwB3Tn_1dBDSiQAO9g9gP28YU080VaVpialOUQQ6lAetYA5Nyl1dsr_9CEJoNHdhQdrHABlXWaS16NIYSkVWZp78oY2xhUH-2Ta6fFFFLsGGwMTOKY6vA2LmR2os7nE69lLPkhaWdzX1MuC3gh_6nXE2R2_AJZhAbZ01cgBOn5GwGwRJEHkKmGiyD4vyxNjO1Y5R8pDIsR-iIbLqwdw4kGPy6See0pkAcvRw&lib=MaRlNg26VJCrQpKjOBdZBGM5k6x6jm7gF',
+            
             // OMDb API Key - Get free key from: https://www.omdbapi.com/apikey.aspx
             OMDB_API_KEY: '379bafb0'
         };
@@ -667,20 +668,23 @@
 
         async function saveMovie(movieData) {
             try {
+                const payload = {
+                    action: editingRow ? 'update' : 'add',
+                    row: editingRow,
+                    data: movieData
+                };
+
                 const response = await fetch(CONFIG.API_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: editingRow ? 'update' : 'add',
-                        row: editingRow,
-                        data: movieData
-                    })
+                    body: JSON.stringify(payload)
                 });
 
-                if (!response.ok) throw new Error('Failed to save');
-                
+                // With no-cors, we can't read the response, so just assume success
+                // and reload to verify
                 closeModal();
-                loadMovies();
+                setTimeout(() => loadMovies(), 1000);
             } catch (error) {
                 alert('Failed to save movie: ' + error.message);
             }
@@ -690,8 +694,9 @@
             if (!confirm('Delete this movie?')) return;
 
             try {
-                const response = await fetch(CONFIG.API_URL, {
+                await fetch(CONFIG.API_URL, {
                     method: 'POST',
+                    mode: 'no-cors',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'delete',
@@ -699,9 +704,8 @@
                     })
                 });
 
-                if (!response.ok) throw new Error('Failed to delete');
-                
-                loadMovies();
+                // Reload after a brief delay to let the script process
+                setTimeout(() => loadMovies(), 1000);
             } catch (error) {
                 alert('Failed to delete movie: ' + error.message);
             }
@@ -802,6 +806,9 @@
             editingRow = null;
             document.getElementById('modalTitle').textContent = 'Add Movie';
             document.getElementById('movieForm').reset();
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').innerHTML = '';
+            document.getElementById('movieSearch').style.display = 'block';
             document.getElementById('movieModal').classList.add('active');
         }
 
@@ -811,6 +818,7 @@
             if (!movie) return;
 
             document.getElementById('modalTitle').textContent = 'Edit Movie';
+            document.getElementById('movieSearch').style.display = 'none';
             document.getElementById('title').value = movie.title || '';
             document.getElementById('year').value = movie.year || '';
             document.getElementById('genre').value = movie.genre || '';
